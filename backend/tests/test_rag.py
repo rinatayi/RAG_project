@@ -12,7 +12,7 @@ from app.services.rag_service import call_lightrag_search
 async def test_lightrag_connection():
   print("=== 開始測試 LightRAG 檢索連線與 Prompt 產生 ===")
 
-  test_query = "5公尺以上高空作業需要哪些安全措施？"
+  test_query = "雇主未提供必要的安全衛生設備或措施，導致勞工發生重大職業災害時，會面臨什麼法律責任？"
   test_scenario = "compliance_planning"
 
   try:

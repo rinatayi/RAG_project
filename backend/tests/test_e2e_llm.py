@@ -15,7 +15,7 @@ async def test_full_rag_pipeline():
     
     test_query = "雇主未提供必要的安全衛生設備或措施，導致勞工發生重大職業災害時，會面臨什麼法律責任？"
     scenario = "compliance_planning"
-    model = "llama3"  # 請依你地端 Ollama 已下載的模型名稱調整（如 llama3, qwen2.5 等）
+    model = "qwen3.6:35b"  # 請依你地端 Ollama 已下載的模型名稱調整（如 llama3, qwen2.5 等）
     
     print(f"[1/3] 發送問題: '{test_query}' (情境: {scenario})")
     

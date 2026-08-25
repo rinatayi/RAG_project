@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import chat
+from backend.ai_service.app.api.v1.endpoints import chat
 
 app = FastAPI(
     title="職安智腦 API 服務",

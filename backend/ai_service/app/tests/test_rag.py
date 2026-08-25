@@ -5,8 +5,8 @@ import sys
 # 將 backend 目錄加入 sys.path，解決 No module named 'app'
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from app.prompts.templates import PromptManager
-from app.services.rag_service import call_lightrag_search
+from backend.ai_service.app.prompts.templates import PromptManager
+from backend.ai_service.app.services.rag_service import call_lightrag_search
 
 
 async def test_lightrag_connection():

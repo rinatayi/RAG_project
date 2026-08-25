@@ -1,9 +1,9 @@
 # backend/app/api/v1/endpoints/chat.py
 import time
 from fastapi import APIRouter, HTTPException
-from app.schemas.chat import ChatRequest, ChatResponse, SourceNode
-from app.prompts.templates import PromptManager
-from app.services.rag_service import call_lightrag_search, call_ollama_llm
+from backend.ai_service.app.schemas.chat import ChatRequest, ChatResponse, SourceNode
+from backend.ai_service.app.prompts.templates import PromptManager
+from backend.ai_service.app.services.rag_service import call_lightrag_search, call_ollama_llm
 
 router = APIRouter()
 

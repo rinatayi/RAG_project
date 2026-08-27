@@ -1,56 +1,73 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import httpx
 from typing import Dict, Any
-from app.core.prompt_manager import PromptManager
+from app.core.templates import PromptManager
 
+# 外部微服務連線位址設定
 LIGHTRAG_API_URL = "http://localhost:9621/query"
 OLLAMA_API_URL = "http://localhost:11434/api/generate"
 
-async def call_lightrag_search(query: str, scenario: str = "general") -> Dict[str, Any]:
+
+async def call_lightrag_search(query: str, scenario: str = "compliance_planning") -> Dict[str, Any]:
+    """
+    呼叫 LightRAG API 進行知識庫向量與知識圖譜檢索
+    """
     payload = {
         "query": query,
-        "mode": "hybrid"
+        "mode": "hybrid"  # 使用混合檢索模式以涵蓋實體與全文資訊
     }
-    print(" -> [Step 1] 正發送 LightRAG 檢索請求...", flush=True)
     timeout_config = httpx.Timeout(60.0, connect=10.0)
+    
     async with httpx.AsyncClient(timeout=timeout_config) as client:
         response = await client.post(LIGHTRAG_API_URL, json=payload)
         response.raise_for_status()
         data = response.json()
+        
+        # 提取檢索到的 Context 內容
         context_text = data.get("response", "") or data.get("context", "")
-        print(f" -> [Step 1 完成] 取得 Context 長度: {len(context_text)} 字", flush=True)
         return {"context": context_text}
 
+
 async def call_ollama_generate(prompt: str, model: str = "llama3") -> str:
+    """
+    呼叫 Ollama API 進行 LLM 文字生成
+    """
     payload = {
         "model": model,
         "prompt": prompt,
         "stream": False,
         "options": {
-            "temperature": 0.2
+            "temperature": 0.2  # 低 Temperature 以保持回答穩定與嚴謹
         }
     }
-    print(f" -> [Step 2] 正發送 Ollama ({model}) 生成請求...", flush=True)
     timeout_config = httpx.Timeout(180.0, connect=10.0)
-    async with httpx.AsyncClient(timeout=180.0) as client:
+    
+    async with httpx.AsyncClient(timeout=timeout_config) as client:
         response = await client.post(OLLAMA_API_URL, json=payload)
         response.raise_for_status()
         data = response.json()
-        print(" -> [Step 2 完成] Ollama 回應生成完畢！", flush=True)
         return data.get("response", "")
 
-async def generate_rag_response(query: str, scenario: str = "general", model: str = "llama3") -> Dict[str, Any]:
+
+async def generate_rag_response(query: str, scenario: str = "compliance_planning", model: str = "llama3") -> Dict[str, Any]:
+    """
+    RAG 主流程控制：檢索 -> 組裝 Prompt -> LLM 推理生成
+    """
+    # 1. 執行 LightRAG 檢索
     search_res = await call_lightrag_search(query, scenario)
     context = search_res.get("context", "")
     
-    full_prompt = PromptManager.build_prompt(
+    # 2. 依據情境使用 PromptManager 組裝 Prompt
+    full_prompt = PromptManager.get_prompt(
         scenario=scenario,
         context=context,
         query=query
     )
     
+    # 3. 呼叫 LLM 進行推理
     llm_response = await call_ollama_generate(full_prompt, model=model)
     
+    # 4. 回傳格式化結果
     return {
         "query": query,
         "scenario": scenario,
